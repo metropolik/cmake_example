@@ -11,6 +11,12 @@ int add(int i, int j) {
 void readSrcPixel(std::vector<float> & sourceTexture, int srcTexW, int srcTexH, double xco, double yco, float & r, float & g, float & b, float & a) {
     int nxco = (int)round(xco);
     int nyco = (int)round(yco);
+    if (nxco < 0 || nxco >= srcTexW) {
+        nxco = (srcTexW + (nxco%srcTexW))%srcTexW;
+    }
+    if (nyco < 0 || nyco >= srcTexH) {
+        nyco = (srcTexH + (nyco%srcTexH))%srcTexH;
+    }
     nyco -= 1;
     int r_idx = (nyco * srcTexW + nxco) * 4;
     r = sourceTexture[r_idx];
