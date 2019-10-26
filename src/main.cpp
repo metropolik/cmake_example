@@ -30,10 +30,10 @@ void calcWeights(double ax, double ay, double bx, double by, double cx, double c
         const double d11 = v1x * v1x + v1y * v1y;
         const double d20 = v2x * v0x + v2y * v0y;
         const double d21 = v2x * v1x + v2y * v1y;
-        const double denom = d00 * d11 - d01 * d01
-        v = (d11 * d20 - d01 * d21) / denom
-        w = (d00 * d21 - d01 * d20) / denom
-        u = 1.0 - v - w
+        const double denom = d00 * d11 - d01 * d01;
+        v = (d11 * d20 - d01 * d21) / denom;
+        w = (d00 * d21 - d01 * d20) / denom;
+        u = 1.0 - v - w;
 }
 
 bool isInTriangle(const double u, const double v, const double w) {
@@ -54,17 +54,17 @@ bool isInTriangle(const double u, const double v, const double w) {
 
 std::vector<unsigned char> remap(int ux, int uy, int uw, int uh, int timw, int timh, std::vector<unsigned char> sourceTexture, int srcTexW, int srcTexH, std::vector<double> originalUv, std::vector<double> newUv) {
     std::vector<unsigned char> out;
-    out.reserver(uw * uh * 4);
+    out.reserve(uw * uh * 4);
     for (int pixel_x = ux; pixel_x < ux + uw; pixel_x++) {
         for (int pixel_y = uy; pixel_y < uy + uh; pixel_y++) {
             //find triangle in which current pixel is in
             double uvp_x = ((double)pixel_x)/((double)timw);
             double uvp_y = 1.0 - ((double)pixel_y)/((double)timh);
-            double u, v, w, newcox, newcoy;
+            double u, v, w, newCox, newCoy;
             //try first triangle
             //                   0                   1                   2
             calcWeights(newUv[0], newUv[1], newUv[2], newUv[3], newUv[4], newUv[5], uvp_x, uvp_y, u, v, w);
-            if (!isInTriangle(u, v, w) {
+            if (!isInTriangle(u, v, w)) {
             //                       2                   3                   0
                 calcWeights(newUv[4], newUv[5], newUv[6], newUv[7], newUv[0], newUv[1], uvp_x, uvp_y, u, v, w);
                 newCox = u * originalUv[4] + v * originalUv[6] + w * originalUv[0];
@@ -76,8 +76,7 @@ std::vector<unsigned char> remap(int ux, int uy, int uw, int uh, int timw, int t
             newCox *= srcTexW;
             newCoy *= srcTexH;
             unsigned char r, g, b, a;
-            readSource
-            readSrcPixel(sourceTexture, srcTexW, srcTexH, newCox, newCoy, r, g, b, a) {
+            readSrcPixel(sourceTexture, srcTexW, srcTexH, newCox, newCoy, r, g, b, a);
             out.push_back(r);
             out.push_back(g);
             out.push_back(b);
