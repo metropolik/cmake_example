@@ -2,12 +2,13 @@
 #include <pybind11/stl.h>
 #include <vector>
 #include <math.h>
+#include <iostream>
 
 int add(int i, int j) {
     return i + j;
 }
 
-void readSrcPixel(std::vector<unsigned char> sourceTexture, int srcTexW, int srcTexH, double xco, double yco, unsigned char & r, unsigned char & g, unsigned char & b, unsigned char & a) {
+void readSrcPixel(std::vector<float> sourceTexture, int srcTexW, int srcTexH, double xco, double yco, float & r, float & g, float & b, float & a) {
     int nxco = (int)round(xco);
     int nyco = (int)round(yco);
     nyco -= 1;
@@ -52,8 +53,9 @@ bool isInTriangle(const double u, const double v, const double w) {
 }*/
 
 
-std::vector<unsigned char> remap(int ux, int uy, int uw, int uh, int timw, int timh, std::vector<unsigned char> sourceTexture, int srcTexW, int srcTexH, std::vector<double> originalUv, std::vector<double> newUv) {
-    std::vector<unsigned char> out;
+std::vector<float> remap(int ux, int uy, int uw, int uh, int timw, int timh, std::vector<float> sourceTexture, int srcTexW, int srcTexH, std::vector<double> originalUv, std::vector<double> newUv) {
+    std::cout << "Starting remap" << std::endl;
+    std::vector<float> out;
     out.reserve(uw * uh * 4);
     for (int pixel_x = ux; pixel_x < ux + uw; pixel_x++) {
         for (int pixel_y = uy; pixel_y < uy + uh; pixel_y++) {
@@ -75,7 +77,7 @@ std::vector<unsigned char> remap(int ux, int uy, int uw, int uh, int timw, int t
             }
             newCox *= srcTexW;
             newCoy *= srcTexH;
-            unsigned char r, g, b, a;
+            float r, g, b, a;
             readSrcPixel(sourceTexture, srcTexW, srcTexH, newCox, newCoy, r, g, b, a);
             out.push_back(r);
             out.push_back(g);
@@ -83,6 +85,7 @@ std::vector<unsigned char> remap(int ux, int uy, int uw, int uh, int timw, int t
             out.push_back(a);
         }
     }
+    std::cout << "Remap finished" << std::endl;
     return out;
 }
 
