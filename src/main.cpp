@@ -19,7 +19,28 @@ void readSrcPixel(std::vector<float> & sourceTexture, int srcTexW, int srcTexH, 
     a = sourceTexture[r_idx+3];
 }
 
-void calcWeights(double ax, double ay, double bx, double by, double cx, double cy, double px, double py, double & u, double & v, double & w) {
+double dist1(double a, double b) {
+    return abs(a-b);
+}
+
+double dist2(double ax, double ay, double bx, double by) {
+    const double f1 = ax - bx;
+    const double f2 = ay - by;
+    return sqrt(f1*f1 + f2 * f2);
+}
+
+void calcWeights(double ax, double ay, double bx, double by, double cx, double cy, double px, double py, double & u, double & v, double & w, bool nudge = false) {
+        if (nudge) {
+            //avoid edge cases by nuding the point a tiny amount to the center
+            const double centerTriangleX = (ax + bx + cx)/3.0;
+            const double centerTriangleY = (ay + by + cy)/3.0;
+            const double relox = px - centerTriangleX;
+            const double reloy = py - centerTriangleY;
+            px = centerTriangleX + relox * 0.99;
+            py = centerTriangleY + reloy * 0.99;
+        }
+
+        //calc barycentric weights
         const double v0x = bx - ax;
         const double v0y = by - ay;
         const double v1x = cx - ax;
@@ -35,6 +56,12 @@ void calcWeights(double ax, double ay, double bx, double by, double cx, double c
         v = (d11 * d20 - d01 * d21) / denom;
         w = (d00 * d21 - d01 * d20) / denom;
         u = 1.0 - v - w;
+        const double ud = dist1(u, 0.5);
+        const double vd = dist1(v, 0.5);
+        const double wd = dist1(w, 0.5);
+        if ((ud > 0.499 && ud < 0.501) || (vd > 0.499 && vd < 0.501) || (wd > 0.499 && wd < 0.501)) {
+            calcWeights(ax, ay, bx, by, cx, cy, px, py, u, v, w, true);
+        }
 }
 
 bool isInTriangle(const double u, const double v, const double w) {
