@@ -8,13 +8,13 @@ int add(int i, int j) {
     return i + j;
 }
 
-void readSrcPixel(std::vector<float> sourceTexture, int srcTexW, int srcTexH, double xco, double yco, float & r, float & g, float & b, float & a) {
+void readSrcPixel(std::vector<float> & sourceTexture, int srcTexW, int srcTexH, double xco, double yco, float & r, float & g, float & b, float & a) {
     int nxco = (int)round(xco);
     int nyco = (int)round(yco);
     nyco -= 1;
     int r_idx = (nyco * srcTexW + nxco) * 4;
     r = sourceTexture[r_idx];
-    b = sourceTexture[r_idx+1];
+    g = sourceTexture[r_idx+1];
     b = sourceTexture[r_idx+2];
     a = sourceTexture[r_idx+3];
 }
@@ -54,10 +54,11 @@ bool isInTriangle(const double u, const double v, const double w) {
 
 
 std::vector<float> remap(int ux, int uy, int uw, int uh, int timw, int timh, std::vector<float> sourceTexture, int srcTexW, int srcTexH, std::vector<double> originalUv, std::vector<double> newUv) {
-    std::cout << "Starting remap" << std::endl;
+    //std::cout << "Starting remap for " << uw * uh << " pixels" << std::endl;
     std::vector<float> out;
     out.reserve(uw * uh * 4);
     for (int pixel_x = ux; pixel_x < ux + uw; pixel_x++) {
+        //std::cout << "Process " << ((double)pixel_x/((double)(ux + uw)))*100.0 << std::endl;
         for (int pixel_y = uy; pixel_y < uy + uh; pixel_y++) {
             //find triangle in which current pixel is in
             double uvp_x = ((double)pixel_x)/((double)timw);
@@ -85,7 +86,7 @@ std::vector<float> remap(int ux, int uy, int uw, int uh, int timw, int timh, std
             out.push_back(a);
         }
     }
-    std::cout << "Remap finished" << std::endl;
+    //std::cout << "Remap finished" << std::endl;
     return out;
 }
 
