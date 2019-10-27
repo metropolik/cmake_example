@@ -3,12 +3,31 @@
 #include <vector>
 #include <math.h>
 #include <iostream>
+#include <unordered_map>
+#include <string>
+
+std::unordered_map<std::string, std::vector<float>> sourceImages;
 
 int add(int i, int j) {
     return i + j;
 }
 
-void readSrcPixel(std::vector<float> & sourceTexture, int srcTexW, int srcTexH, double xco, double yco, float & r, float & g, float & b, float & a) {
+bool hasImage(std::string imgName) {
+    return !(sourceImages.find(imgName) == sourceImages.end());
+}
+
+void addNewImage(std::string imgName, std::vector<float> img) {
+    std::cout << "Adding new image " << imgName << " to collection" << std::endl;
+    sourceImages[imgName] = img;
+    std::cout << "Done adding" << std::endl;
+}
+
+void readSrcPixel(std::string textureName, int srcTexW, int srcTexH, double xco, double yco, float & r, float & g, float & b, float & a) {
+    if (!hasImage(textureName)) {
+        std::cout << "FATAL image not contained in cached images!" << std::endl;
+        return;
+    }
+    std::vector<float> & sourceTexture = sourceImages[textureName];
     int nxco = (int)round(xco);
     int nyco = (int)round(yco);
     if (nxco < 0 || nxco >= srcTexW) {
@@ -86,7 +105,7 @@ bool isInTriangle(const double u, const double v, const double w) {
 }*/
 
 
-std::vector<float> remap(int ux, int uy, int uw, int uh, int timw, int timh, std::vector<float> sourceTexture, int srcTexW, int srcTexH, std::vector<double> originalUv, std::vector<double> newUv) {
+std::vector<float> remap(int ux, int uy, int uw, int uh, int timw, int timh, std::string textureName, int srcTexW, int srcTexH, std::vector<double> originalUv, std::vector<double> newUv) {
     //std::cout << "Starting remap for " << uw * uh << " pixels" << std::endl;
     std::vector<float> out;
     out.reserve(uw * uh * 4);
@@ -112,7 +131,7 @@ std::vector<float> remap(int ux, int uy, int uw, int uh, int timw, int timh, std
             newCox *= srcTexW;
             newCoy *= srcTexH;
             float r, g, b, a;
-            readSrcPixel(sourceTexture, srcTexW, srcTexH, newCox, newCoy, r, g, b, a);
+            readSrcPixel(textureName, srcTexW, srcTexH, newCox, newCoy, r, g, b, a);
             out.push_back(r);
             out.push_back(g);
             out.push_back(b);
@@ -131,6 +150,8 @@ PYBIND11_MODULE(cmake_example, m) {
     )pbdoc";
 
     m.def("remap", &remap, R"pbdoc(Remaps the thing.)pbdoc");
+    m.def("hasImage", &hasImage, R"pbdoc(Checks if the image is already cached.)pbdoc");
+    m.def("addNewImage", &addNewImage, R"pbdoc(Checks if the image is already cached.)pbdoc");
 
     m.def("add", &add, R"pbdoc( Add two numbers Some other explanation about the add function.)pbdoc");
 
